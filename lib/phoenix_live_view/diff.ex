@@ -82,7 +82,8 @@ defmodule Phoenix.LiveView.Diff do
     {binary, components}
   end
 
-  defp keyed_to_iodata(index, limit, keyed, static, components, template, mapper, acc) when index < limit do
+  defp keyed_to_iodata(index, limit, keyed, static, components, template, mapper, acc)
+       when index < limit do
     diff = Map.fetch!(keyed, index)
     {iodata, components} = to_iodata(Map.put(diff, @static, static), components, template, mapper)
     keyed_to_iodata(index + 1, limit, keyed, static, components, template, mapper, [iodata | acc])
