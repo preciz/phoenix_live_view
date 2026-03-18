@@ -44,7 +44,7 @@ defmodule Phoenix.LiveView.Controller do
         |> Phoenix.Controller.put_view(LiveView.Static)
         |> Phoenix.Controller.render(
           :template,
-          Map.merge(socket_assigns, %{content: content, live_module: view})
+          socket_assigns |> Map.put(:content, content) |> Map.put(:live_module, view)
         )
 
       {:stop, %Socket{redirected: {:redirect, %{status: status} = opts}} = socket} ->
