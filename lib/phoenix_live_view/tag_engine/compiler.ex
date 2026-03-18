@@ -968,7 +968,7 @@ defmodule Phoenix.LiveView.TagEngine.Compiler do
       end)
 
     acc_assigns =
-      Enum.into(acc_assigns, %{}, fn {key, assigns_ast} ->
+      Map.new(acc_assigns, fn {key, assigns_ast} ->
         cond do
           # No special entry, return it as a list
           not Map.fetch!(specials, key) ->
