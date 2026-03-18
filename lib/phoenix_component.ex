@@ -971,8 +971,10 @@ defmodule Phoenix.Component do
   do not belong in the markup, or are already handled explicitly by the component.
   '''
   def assigns_to_attributes(assigns, exclude \\ []) do
-    excluded_keys = @reserved_assigns ++ exclude
-    for {key, val} <- assigns, key not in excluded_keys, into: [], do: {key, val}
+    assigns
+    |> Map.drop(@reserved_assigns)
+    |> Map.drop(exclude)
+    |> Map.to_list()
   end
 
   @doc """
