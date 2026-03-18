@@ -390,13 +390,8 @@ defmodule Phoenix.LiveView.UploadConfig do
   @accept_wildcards ~w(audio/* image/* video/*)
 
   defp validate_accept_option(accept) do
-    {types, exts} =
-      Enum.reduce(accept, {[], []}, fn opt, {types_acc, exts_acc} ->
-        {type, exts} = accept_option!(opt)
-        {[type | types_acc], exts ++ exts_acc}
-      end)
-
-    {MapSet.new(types), MapSet.new(exts)}
+    {types, exts} = Enum.unzip(Enum.map(accept, &accept_option!/1))
+    {MapSet.new(types), exts |> List.flatten() |> MapSet.new()}
   end
 
   # wildcards for media files
