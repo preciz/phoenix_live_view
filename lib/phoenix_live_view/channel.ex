@@ -826,9 +826,9 @@ defmodule Phoenix.LiveView.Channel do
   defp maybe_merge_meta(value, _raw_payload), do: value
 
   defp gather_keys(%{} = map, acc) do
-    case Enum.at(map, 0) do
-      {key, val} -> gather_keys(val, [key | acc])
-      nil -> acc
+    case Enum.take(map, 1) do
+      [{key, val}] -> gather_keys(val, [key | acc])
+      [] -> acc
     end
   end
 
