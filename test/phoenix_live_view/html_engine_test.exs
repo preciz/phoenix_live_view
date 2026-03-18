@@ -2721,4 +2721,38 @@ defmodule Phoenix.LiveView.HTMLEngineTest do
       assert TreeDOM.normalize_to_tree(compiled) == expected
     end
   end
+
+  describe "compiler edge cases" do
+    test "literal_keys? handles non-atom/string keys" do
+      ast = [{1, "value"}]
+      # This should return {:quoted, ...} instead of {:attributes, ...}
+      assert {:quoted, _} = Phoenix.LiveView.HTMLEngine.handle_attributes(ast, line: 1)
+    end
+
+    test "extract_binaries handles unknown binary parts" do
+      # When an unknown part is inside a string interpolation or binary, it should
+      # fallback to quoted_binary_encode instead of crashing.
+      assigns = %{}
+      assert render_to_string(~H"""
+      <div class={<<1, 2, 3>>} />
+      """) == "<div class=\"\x01\x02\x03\"></div>"
+    end
+
+    test "safe_unless_special handles aria and data" do
+      assigns = %{aria: "hidden", data: "test"}
+      assert render_to_string(~H"""
+      <div aria={@aria} data={@data} />
+      """) == "<div aria=\"hidden\" data=\"test\"></div>"
+    end
+
+    test "annotate_body rescue block" do
+      # The rescue block in annotate_body catches errors when debug_annotations? fails
+      # due to missing caller module. We can simulate this by passing a broken Macro.Env
+      assert Phoenix.LiveView.HTMLEngine.annotate_body(%Macro.Env{module: nil}) == nil
+    end
+  end
+
+  defp render_to_string(rendered) do
+    rendered |> Phoenix.HTML.Safe.to_iodata() |> IO.iodata_to_binary()
+  end
 end
