@@ -280,7 +280,7 @@ defmodule Phoenix.LiveViewTest.DOM do
   def all_value_inputs({"form", attrs, _} = form, root) do
     form_inputs = filtered_inputs(form)
 
-    case Enum.into(attrs, %{}) do
+    case Map.new(attrs) do
       %{"id" => id} ->
         by_form_id = all(root, ~s<[form="#{id}"]>) |> to_tree()
         named_inputs = filtered_inputs(by_form_id)

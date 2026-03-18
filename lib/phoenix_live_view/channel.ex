@@ -1380,7 +1380,7 @@ defmodule Phoenix.LiveView.Channel do
     if container = session.redirected? && Route.container(route) do
       {tag, attrs} = container
 
-      attrs = attrs |> resolve_class_attribute_as_list() |> Enum.into(%{})
+      attrs = attrs |> resolve_class_attribute_as_list() |> Map.new()
 
       Map.put(diff, :container, [tag, attrs])
     else
