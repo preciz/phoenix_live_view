@@ -163,7 +163,9 @@ defmodule Phoenix.LiveView.Utils do
   end
 
   defp configure_assigns(assigns, action, flash) do
-    Map.merge(assigns, %{live_action: action, flash: flash})
+    assigns
+    |> Map.put(:live_action, action)
+    |> Map.put(:flash, flash)
   end
 
   defp prune_uri(:not_mounted_at_router), do: :not_mounted_at_router
