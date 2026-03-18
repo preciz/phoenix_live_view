@@ -809,7 +809,7 @@ defmodule Phoenix.LiveView.Diff do
   end
 
   defp render_pending_components(_, pending, _seen_ids, _cids, diffs, components)
-       when map_size(pending) == 0 do
+       when pending == %{} do
     {diffs, components}
   end
 
