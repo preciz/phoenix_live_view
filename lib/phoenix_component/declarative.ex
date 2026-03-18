@@ -1192,7 +1192,7 @@ defmodule Phoenix.Component.Declarative do
 
             for %{attrs: slot_attrs, line: slot_line, root: false} <- slot_values,
                 attr_name <- required_attrs,
-                not Map.has_key?(slot_attrs, attr_name) do
+                not is_map_key(slot_attrs, attr_name) do
               message =
                 "missing required attribute \"#{attr_name}\" in slot \"#{slot_name}\" " <>
                   "for component #{component_fa(call)}"

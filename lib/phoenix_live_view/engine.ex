@@ -748,7 +748,7 @@ defmodule Phoenix.LiveView.Engine do
     do: false
 
   defp parent_is_checked?(rest, assigns),
-    do: Map.has_key?(assigns, Enum.reverse(rest)) or parent_is_checked?(tl(rest), assigns)
+    do: is_map_key(assigns, Enum.reverse(rest)) or parent_is_checked?(tl(rest), assigns)
 
   ## Component keys change tracking
 

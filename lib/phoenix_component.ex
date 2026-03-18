@@ -2884,7 +2884,7 @@ defmodule Phoenix.Component do
   defp next_id(idx, %{} = seen_ids) do
     id_str = to_string(idx)
 
-    if Map.has_key?(seen_ids, id_str) do
+    if is_map_key(seen_ids, id_str) do
       next_id(idx + 1, seen_ids)
     else
       id_str
