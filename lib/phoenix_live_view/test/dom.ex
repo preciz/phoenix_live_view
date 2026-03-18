@@ -146,8 +146,7 @@ defmodule Phoenix.LiveViewTest.DOM do
   end
 
   defp component_id(tree) do
-    LazyHTML.attribute(tree, @phx_component)
-    |> List.first()
+    attribute(tree, @phx_component)
   end
 
   def tag(node) do
