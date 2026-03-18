@@ -270,7 +270,7 @@ defmodule Phoenix.LiveViewTest.DOM do
   """
   def find_static_views(lazy) do
     all(lazy, "[data-phx-static]")
-    |> Enum.into(%{}, fn node ->
+    |> Map.new(fn node ->
       {attribute(node, "id"), attribute(node, "data-phx-static")}
     end)
   end

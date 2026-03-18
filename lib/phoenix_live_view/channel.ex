@@ -1701,7 +1701,7 @@ defmodule Phoenix.LiveView.Channel do
   defp socket_asyncs(private, cid) do
     case private do
       %{live_async: ref_pids} ->
-        Enum.into(ref_pids, %{}, fn {key, {ref, pid, kind}} -> {pid, {key, ref, cid, kind}} end)
+        Map.new(ref_pids, fn {key, {ref, pid, kind}} -> {pid, {key, ref, cid, kind}} end)
 
       %{} ->
         %{}
