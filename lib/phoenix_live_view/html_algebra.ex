@@ -608,7 +608,7 @@ defmodule Phoenix.LiveView.HTMLAlgebra do
       |> Enum.reverse()
       |> pop_head_if_only_spaces_or_newlines(inline?, :newlines_after_text)
 
-    force? = if Enum.empty?(block), do: false, else: first_force? or last_force?
+    force? = if block == [], do: false, else: first_force? or last_force?
 
     {Enum.reverse(block), force?}
   end

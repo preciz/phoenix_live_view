@@ -495,7 +495,7 @@ defmodule Phoenix.Component.Declarative do
   end
 
   defp validate_attr_examples!(slot, name, type, examples, line, file) do
-    if not is_list(examples) or Enum.empty?(examples) do
+    if not is_list(examples) or examples == [] do
       compile_error!(line, file, """
       :examples must be a non-empty list, got: #{inspect(examples)}
       """)
