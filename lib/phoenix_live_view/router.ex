@@ -444,8 +444,12 @@ defmodule Phoenix.LiveView.Router do
     live_view
     |> Module.split()
     |> Enum.drop_while(&(not String.ends_with?(&1, "Live")))
-    |> Enum.map(&(&1 |> String.replace_suffix("Live", "") |> Macro.underscore()))
-    |> Enum.reject(&(&1 == ""))
+    |> Enum.flat_map(fn part ->
+      case part |> String.replace_suffix("Live", "") |> Macro.underscore() do
+        "" -> []
+        formatted -> [formatted]
+      end
+    end)
     |> Enum.join("_")
     |> case do
       "" ->
