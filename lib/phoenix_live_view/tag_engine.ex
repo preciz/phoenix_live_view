@@ -211,7 +211,7 @@ defmodule Phoenix.LiveView.TagEngine do
     # parent_changed will always be marked as changed whenever any of the
     # assigns it references inside is changed. It will also be marked as
     # changed if it has any variable (such as the ones coming from let).
-    if is_nil(parent_changed) or Map.has_key?(parent_changed, key) do
+    if is_nil(parent_changed) or is_map_key(parent_changed, key) do
       assigns
     else
       Map.put(assigns, :__changed__, %{})

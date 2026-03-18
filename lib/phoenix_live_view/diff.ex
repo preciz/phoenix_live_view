@@ -825,7 +825,7 @@ defmodule Phoenix.LiveView.Diff do
         {assigns_sockets, metadata, components, seen_ids} =
           Enum.reduce(entries, {[], [], components, seen_ids}, fn
             {cid, id, new?, new_assigns}, {assigns_sockets, metadata, components, seen_ids} ->
-              if Map.has_key?(seen_ids, [component | id]) do
+              if is_map_key(seen_ids, [component | id]) do
                 raise "found duplicate ID #{inspect(id)} " <>
                         "for component #{inspect(component)} when rendering template"
               end

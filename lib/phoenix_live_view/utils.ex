@@ -136,7 +136,7 @@ defmodule Phoenix.LiveView.Utils do
   """
   def changed?(%Socket{} = socket, assign), do: changed?(socket.assigns, assign)
   def changed?(%{__changed__: nil}, _assign), do: true
-  def changed?(%{__changed__: changed}, assign), do: Map.has_key?(changed, assign)
+  def changed?(%{__changed__: changed}, assign), do: is_map_key(changed, assign)
 
   @doc """
   Returns the CID of the given socket.

@@ -952,7 +952,7 @@ defmodule Phoenix.LiveView.TagEngine.Compiler do
     {acc_assigns, acc_info, specials} =
       Enum.reduce(slots, {%{}, %{}, %{}}, fn
         {key, assigns, special, info}, {acc_assigns, acc_info, specials} ->
-          special? = Map.has_key?(special, ":if") or Map.has_key?(special, ":for")
+          special? = is_map_key(special, ":if") or is_map_key(special, ":for")
           specials = Map.update(specials, key, special?, &(&1 or special?))
 
           case acc_assigns do

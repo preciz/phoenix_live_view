@@ -418,7 +418,7 @@ defmodule Phoenix.LiveViewTest.TreeDOM do
           attr not in reserved_attrs,
           reduce: container_attrs_list do
         acc ->
-          if Map.has_key?(container_attrs, attr) do
+          if is_map_key(container_attrs, attr) do
             Enum.map(acc, fn
               {^attr, _old_val} -> {attr, value}
               {_, _} = other -> other
