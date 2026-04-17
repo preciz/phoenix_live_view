@@ -608,32 +608,55 @@ defmodule Phoenix.LiveView.Diff do
   end
 
   defp traverse_dynamic(dynamic, children, pending, components, template, changed?) do
-    Enum.reduce(dynamic, {0, %{}, children, pending, components, template}, fn
-      entry, {counter, diff, children, pending, components, template} ->
-        child = Map.get(children, counter)
+    traverse_dynamic(dynamic, 0, %{}, children, pending, components, template, changed?)
+  end
 
-        {serialized, child_fingerprint, pending, components, template} =
-          traverse(entry, child, pending, components, template, changed?)
+  defp traverse_dynamic([], counter, diff, children, pending, components, template, _) do
+    {counter, diff, children, pending, components, template}
+  end
 
-        # If serialized is nil, it means no changes.
-        # If it is an empty map, then it means it is a rendered struct
-        # that did not change, so we don't have to emit it either.
-        diff =
-          if serialized != nil and serialized != %{} do
-            Map.put(diff, counter, serialized)
-          else
-            diff
-          end
+  defp traverse_dynamic(
+         [entry | dynamic],
+         counter,
+         diff,
+         children,
+         pending,
+         components,
+         template,
+         changed?
+       ) do
+    child = Map.get(children, counter)
 
-        children =
-          if child_fingerprint do
-            Map.put(children, counter, child_fingerprint)
-          else
-            Map.delete(children, counter)
-          end
+    {serialized, child_fingerprint, pending, components, template} =
+      traverse(entry, child, pending, components, template, changed?)
 
-        {counter + 1, diff, children, pending, components, template}
-    end)
+    # If serialized is nil, it means no changes.
+    # If it is an empty map, then it means it is a rendered struct
+    # that did not change, so we don't have to emit it either.
+    diff =
+      if serialized != nil and serialized != %{} do
+        Map.put(diff, counter, serialized)
+      else
+        diff
+      end
+
+    children =
+      if child_fingerprint do
+        Map.put(children, counter, child_fingerprint)
+      else
+        Map.delete(children, counter)
+      end
+
+    traverse_dynamic(
+      dynamic,
+      counter + 1,
+      diff,
+      children,
+      pending,
+      components,
+      template,
+      changed?
+    )
   end
 
   defp traverse_keyed(
@@ -646,32 +669,20 @@ defmodule Phoenix.LiveView.Diff do
          stream?,
          has_key?
        ) do
-    diff = %{}
-    new_prints = %{}
-
-    {{diff, count, new_prints, pending, components, template}, _seen_keys} =
-      Enum.reduce(
+    {diff, count, new_prints, pending, components, template, _seen_keys} =
+      traverse_keyed(
         entries,
-        {{diff, 0, new_prints, pending, components, template}, %{}},
-        fn
-          {key, vars, render},
-          {{_diff, index, _new_prints, _pending, _components, _template} = acc, seen_keys} ->
-            {key, seen_keys} =
-              cond do
-                not has_key? ->
-                  # no need to check for duplicates if we use the index
-                  {index, seen_keys}
-
-                Map.has_key?(seen_keys, key) ->
-                  raise "found duplicate key #{inspect(key)} in comprehension"
-
-                true ->
-                  {key, Map.put(seen_keys, key, true)}
-              end
-
-            {process_keyed({key, vars, render}, previous_prints, changed?, stream?, acc),
-             seen_keys}
-        end
+        previous_prints,
+        %{},
+        0,
+        %{},
+        pending,
+        components,
+        template,
+        %{},
+        changed?,
+        stream?,
+        has_key?
       )
 
     # we don't need to send the diff if nothing changed;
@@ -680,6 +691,75 @@ defmodule Phoenix.LiveView.Diff do
     else
       {Map.put(diff, @keyed_count, count), new_prints, pending, components, template}
     end
+  end
+
+  defp traverse_keyed(
+         [],
+         _,
+         diff,
+         count,
+         new_prints,
+         pending,
+         components,
+         template,
+         seen_keys,
+         _,
+         _,
+         _
+       ) do
+    {diff, count, new_prints, pending, components, template, seen_keys}
+  end
+
+  defp traverse_keyed(
+         [{key, vars, render} | entries],
+         previous_prints,
+         diff,
+         index,
+         new_prints,
+         pending,
+         components,
+         template,
+         seen_keys,
+         changed?,
+         stream?,
+         has_key?
+       ) do
+    {key, seen_keys} =
+      cond do
+        not has_key? ->
+          # no need to check for duplicates if we use the index
+          {index, seen_keys}
+
+        Map.has_key?(seen_keys, key) ->
+          raise "found duplicate key #{inspect(key)} in comprehension"
+
+        true ->
+          {key, Map.put(seen_keys, key, true)}
+      end
+
+    {diff, index, new_prints, pending, components, template} =
+      process_keyed(
+        {key, vars, render},
+        previous_prints,
+        changed?,
+        stream?,
+        {diff, index, new_prints, pending, components, template}
+      )
+
+    traverse_keyed(
+      entries,
+      previous_prints,
+      diff,
+      index,
+      new_prints,
+      pending,
+      components,
+      template,
+      seen_keys,
+      changed?,
+      stream?,
+      has_key?
+    )
   end
 
   # it's an existing entry and we are change tracking
