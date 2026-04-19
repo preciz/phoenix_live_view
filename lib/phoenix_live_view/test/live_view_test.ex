@@ -1831,8 +1831,8 @@ defmodule Phoenix.LiveViewTest do
 
   Or in the case of an error tuple:
 
-      assert {:error, {:redirect, %{to: "/somewhere"}}} = result = live(conn, "my-path")
-      {:ok, conn} = follow_redirect(result, conn)
+      assert {:error, {:live_redirect, %{to: "/somewhere"}}} = result = live(conn, "my-path")
+      {:ok, view, html} = follow_redirect(result, conn)
 
   `follow_redirect/3` expects a connection as second argument.
   This is the connection that will be used to perform the underlying
