@@ -71,6 +71,20 @@ defmodule Phoenix.LiveView.DiffTest do
     }
   end
 
+  defp dynamic_child_entry_rendered(mode) do
+    child = %Rendered{
+      static: ["<span>", "</span>"],
+      dynamic: fn track_changes? -> if track_changes?, do: [nil], else: ["hi"] end,
+      fingerprint: 456
+    }
+
+    %Rendered{
+      static: ["<div>", "</div>"],
+      dynamic: fn _ -> [if(mode == :child, do: child, else: nil)] end,
+      fingerprint: 123
+    }
+  end
+
   defp render(
          rendered,
          fingerprints \\ Diff.new_fingerprints(),
@@ -333,6 +347,41 @@ defmodule Phoenix.LiveView.DiffTest do
 
       assert diffed_render == %{0 => "hi"}
       assert fingerprints == tree
+    end
+
+    test "manages child fingerprints during nil and binary transitions" do
+      # 1. Initial render: Child is present
+      {_, fingerprints, components} = render(dynamic_child_entry_rendered(:child))
+      assert fingerprints == {123, %{0 => {456, %{}}}}
+
+      # 2. Transition to nil: Fingerprint MUST be preserved
+      {second_render, fingerprints, components} =
+        render(dynamic_child_entry_rendered(nil), fingerprints, components)
+
+      assert second_render == %{}
+      assert fingerprints == {123, %{0 => {456, %{}}}}
+
+      # 3. Transition to binary: Fingerprint MUST be cleared
+      rendered_bin = %Rendered{
+        static: ["<div>", "</div>"],
+        dynamic: fn _ -> ["a string"] end,
+        fingerprint: 123
+      }
+
+      {third_render, fingerprints, components} =
+        render(rendered_bin, fingerprints, components)
+
+      assert third_render == %{0 => "a string"}
+      assert fingerprints == {123, %{}}
+
+      # 4. Transition back to child: Must full render because fingerprint was cleared
+      {fourth_render, fingerprints, _components} =
+        render(dynamic_child_entry_rendered(:child), fingerprints, components)
+
+      assert fourth_render ==
+               %{0 => %{0 => "hi", :s => 0}, :p => %{0 => ["<span>", "</span>"]}}
+
+      assert fingerprints == {123, %{0 => {456, %{}}}}
     end
 
     test "detects change in nested fingerprint" do
