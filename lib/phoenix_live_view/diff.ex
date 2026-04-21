@@ -625,7 +625,7 @@ defmodule Phoenix.LiveView.Diff do
          template,
          changed?
        )
-       when (is_nil(entry) or is_binary(entry)) and not is_map_key(children, counter) do
+       when is_nil(entry) or (is_binary(entry) and not is_map_key(children, counter)) do
     traverse_dynamic(
       entries,
       counter + 1,
