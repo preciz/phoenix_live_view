@@ -615,6 +615,24 @@ defmodule Phoenix.LiveView.Diff do
     traverse_dynamic(dynamic, 0, %{}, children, pending, components, template, changed?)
   end
 
+  defp traverse_dynamic([nil | entries], counter, diff, children, pending, components, template, changed?) do
+    traverse_dynamic(entries, counter + 1, diff, children, pending, components, template, changed?)
+  end
+
+  defp traverse_dynamic([entry | entries], counter, diff, children, pending, components, template, changed?)
+       when is_binary(entry) and not is_map_key(children, counter) do
+    traverse_dynamic(
+      entries,
+      counter + 1,
+      Map.put(diff, counter, entry),
+      children,
+      pending,
+      components,
+      template,
+      changed?
+    )
+  end
+
   defp traverse_dynamic(
          [entry | entries],
          counter,
