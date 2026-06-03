@@ -1039,10 +1039,7 @@ defmodule Phoenix.LiveView.Diff do
         diffs
       end
 
-    dump =
-      socket
-      |> Utils.clear_temp()
-      |> dump_component(component, id, prints)
+    dump = {component, id, socket.assigns, %{socket.private | live_temp: %{}}, prints}
 
     {cid_to_component, id_to_cid, uuids} = components
     cid_to_component = Map.put(cid_to_component, cid, dump)
@@ -1170,9 +1167,5 @@ defmodule Phoenix.LiveView.Diff do
         private: private,
         redirected: nil
     }
-  end
-
-  defp dump_component(socket, component, id, prints) do
-    {component, id, socket.assigns, socket.private, prints}
   end
 end
