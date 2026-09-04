@@ -400,17 +400,16 @@ defmodule Phoenix.LiveView.HTMLFormatter do
   defp count_newlines_after_text(binary),
     do: count_newlines_until_text(binary, 0, byte_size(binary) - 1, -1)
 
-  defp count_newlines_until_text(binary, counter, pos, inc) do
-    try do
-      :binary.at(binary, pos)
-    rescue
-      _ -> counter
-    else
+  defp count_newlines_until_text(binary, counter, pos, inc)
+       when pos >= 0 and pos < byte_size(binary) do
+    case :binary.at(binary, pos) do
       char when char in [?\s, ?\t] -> count_newlines_until_text(binary, counter, pos + inc, inc)
       ?\n -> count_newlines_until_text(binary, counter + 1, pos + inc, inc)
       _ -> counter
     end
   end
+
+  defp count_newlines_until_text(_binary, counter, _pos, _inc), do: counter
 
   defp leading_whitespace(binary) do
     binary_part(binary, 0, count_leading_whitespace(binary, 0))
@@ -426,15 +425,16 @@ defmodule Phoenix.LiveView.HTMLFormatter do
     trailing_whitespace(binary, byte_size(binary) - 1, 0)
   end
 
-  defp trailing_whitespace(binary, pos, len) do
-    try do
-      :binary.at(binary, pos)
-    rescue
-      _ -> binary_part(binary, byte_size(binary) - len, len)
-    else
+  defp trailing_whitespace(binary, pos, len)
+       when pos >= 0 and pos < byte_size(binary) do
+    case :binary.at(binary, pos) do
       char when char in [?\s, ?\t, ?\n, ?\r] -> trailing_whitespace(binary, pos - 1, len + 1)
       _ -> binary_part(binary, byte_size(binary) - len, len)
     end
+  end
+
+  defp trailing_whitespace(binary, _pos, len) do
+    binary_part(binary, byte_size(binary) - len, len)
   end
 
   # Tree transformation - augments Parser output with formatter metadata
